@@ -1,12 +1,14 @@
-image: $helm_registry_image:$helm_registry_version
+image: $HELM_REGISTRY_IMAGE:$HELM_REGISTRY_VERSION
 
 variables:
-  registry: quay.io
-  registry_user: samsung_cnct
-  chart_name: zabra
-  robot_account: zabra_robot_rw
-  helm_registry_image: quay.io/samsung_cnct/helm-registry-agent
-  helm_registry_version: v0.7.4-helm_2.6
+  REGISTRY: quay.io
+  REGISTRY_USER: your_org # we set this to override to samsung_cnct in gitlab Group Variables
+  CHART_NAME: eventrouter 
+  ROBOT_ACCOUNT: eventrouter_rw
+  HELM_REGISTRY_IMAGE: quay.io/samsung_cnct/helm-registry-agent
+  HELM_REGISTRY_VERSION: v0.7.4-helm_2.6
+# Create a Gitlab Secret Variable called REGISTRY_PASSWORD and assign it the value of the registry robot docker login password.
+# DO NOT PASTE THIS PASSWORD HERE.
 
 stages:
   - build
@@ -14,7 +16,7 @@ stages:
   - publish
 
 before_script:
-  - helm registry login -u ${registry_user}+${robot_account} -p ${REGISTRY_PASSWORD} ${registry}
+  - helm registry login -u ${REGISTRY_USER}+${ROBOT_ACCOUNT} -p ${REGISTRY_PASSWORD} ${REGISTRY}
 
 build_chart:
   stage: build
@@ -23,9 +25,9 @@ build_chart:
     - branches
   artifacts: 
     paths:
-      - ${chart_name}
+      - ${CHART_NAME}
   script:
-    - sh build/build.sh
+    - build/build.sh
 
 helm_test:
   stage: test
@@ -33,18 +35,18 @@ helm_test:
     - tags
     - branches
   script:
-    - sh build/test.sh
+    - build/test.sh
 
 helm_publish_alpha:
   stage: publish
   only:
     - master
   script:
-    - cd ${chart_name} && helm registry push ${registry}/${registry_user}/${chart_name} -c alpha
+    - cd ${CHART_NAME} && helm registry push ${REGISTRY}/${REGISTRY_USER}/${CHART_NAME} -c alpha
 
 helm_publish_tag:
   stage: publish
   only:
     - /v[0-9]+\.[0-9]+(\.[0-9]+[a-z]?)?/
   script:
-    - cd ${chart_name} && helm registry push ${registry}/${registry_user}/${chart_name} -c stable
+    - cd ${CHART_NAME} && helm registry push ${REGISTRY}/${REGISTRY_USER}/${CHART_NAME} -c stable
