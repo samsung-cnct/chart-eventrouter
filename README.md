@@ -1,4 +1,5 @@
 # Eventrouter Deployment for Kubernetes Logging
+[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_chart-eventrouter/badges/master/pipeline.svg)](https://git.cnct.io/common-tools/samsung-cnct_chart-eventrouter/commits/master)
 
 [Eventrouter](https://github.com/heptiolabs/eventrouter) deployment for Kubernetes
 logging. The helm chart and docker image for this repository are located at:
