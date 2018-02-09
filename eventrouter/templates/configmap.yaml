@@ -8,4 +8,8 @@ data:
 kind: ConfigMap
 metadata:
   name: {{ .Values.name }}-configmap
-  namespace: {{ .Values.namespace }} 
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    release: "{{.Release.Name}}"
+    heritage: "{{.Release.Service}}"
