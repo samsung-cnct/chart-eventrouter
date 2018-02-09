@@ -3,6 +3,11 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: {{ .Values.name }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    release: "{{.Release.Name}}"
+    heritage: "{{.Release.Service}}"
 spec:
   replicas: {{ .Values.replicaCount }}
   template:
