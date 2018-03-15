@@ -23,12 +23,13 @@ spec:
           volumeMounts:
           - name: config-volume
             mountPath: /etc/eventrouter 
-          limits:
-            cpu: 10m
-            memory: 30Mi
-          requests:
-            cpu: 10m
-            memory: 30Mi
+          resources:
+            limits:
+              cpu: 10m
+              memory: 30Mi
+            requests:
+              cpu: 10m
+              memory: 30Mi
       serviceAccount: {{ .Values.name }}
       volumes: 
         - name: config-volume
