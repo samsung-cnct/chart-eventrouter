@@ -4,8 +4,8 @@ kind: Deployment
 metadata:
   name: {{ .Values.name }}
   labels:
-    app: {{ template "name" . }}
-    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    app: {{ template "eventrouter.name" . }}
+    chart: {{ template "namewithversion" . }}
     release: "{{.Release.Name}}"
     heritage: "{{.Release.Service}}"
 spec:
@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: {{ .Values.name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
           - name: config-volume
             mountPath: /etc/eventrouter 

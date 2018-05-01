@@ -9,7 +9,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.name }}-configmap
   labels:
-    app: {{ template "name" . }}
-    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    app: {{ template "eventrouter.name" . }}
+    chart: {{ template "namewithversion" . }}
     release: "{{.Release.Name}}"
     heritage: "{{.Release.Service}}"

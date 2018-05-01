@@ -1,6 +1,6 @@
 name: eventrouter
-version: ${CHART_VER}-${CHART_REL}
-description: Chart to install eventrouter deployment 
+version: 0.1.0
+description: A simple introspective kubernetes service that forwards events to a specified sink.
 keywords:
 - kraken
 - eventrouter

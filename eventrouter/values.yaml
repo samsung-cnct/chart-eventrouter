@@ -1,8 +1,0 @@
-name: "eventrouter"
-replicaCount: 1
-image:
-  repository: "quay.io/samsung_cnct/eventrouter-container"
-  tag: "latest" 
-  pullPolicy: "IfNotPresent"
-config:
-  sink: "stdout"

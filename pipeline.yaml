@@ -1,0 +1,18 @@
+type: chart
+envValues:
+  - envVar: KUBECTL_VERSION
+    value: v1.9.2
+rootfs:
+  - image: samsung_cnct/eventrouter-container
+    context: eventrouter
+    chart: eventrouter
+    value: image
+configs:
+  - chart: eventrouter
+    timeout: 600
+    retries: 1
+    release: eventrouter
+prod:  
+  doDeploy: none
+
+ 
