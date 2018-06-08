@@ -22,7 +22,7 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
           - name: config-volume
-            mountPath: /etc/eventrouter 
+            mountPath: /etc/eventrouter
           resources:
             limits:
               cpu: 10m
@@ -30,9 +30,9 @@ spec:
             requests:
               cpu: 10m
               memory: 30Mi
-      serviceAccount: {{ .Values.name }}
-      volumes: 
+      serviceAccount: {{ .Values.name }}-{{ .Release.Namespace }}
+      volumes:
         - name: config-volume
           configMap:
             name: {{ .Values.name }}-configmap
-  
+

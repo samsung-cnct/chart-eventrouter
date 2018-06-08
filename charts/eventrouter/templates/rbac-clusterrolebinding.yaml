@@ -1,0 +1,18 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: "{{ template "uniqName" . }}"
+  labels:
+    app: {{ template "eventrouter.name" . }}
+    chart: {{ template "namewithversion" . }}
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "{{ template "uniqName" . }}"
+subjects:
+- kind: ServiceAccount
+  name: "{{ template "uniqName" . }}"
+  namespace: {{.Release.Namespace}}

@@ -24,3 +24,13 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 -}}
 {{- end -}}
+
+{{/*
+  Create a name with the namespace appended. This is used to set the unique `names` label.
+  We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+ */}}
+
+{{- define "uniqName" -}}
+  {{- $name := default .Chart.Name .Values.nameOverride -}}
+  {{- printf "%s-%s" .Chart.Name .Release.Namespace | replace "+" "_" | trunc 63 -}}
+{{- end -}}
