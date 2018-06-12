@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ .Values.name }}-{{ .Release.Namespace }}
+  name: "{{ template "uniqName" . }}"
   labels:
     app: {{ template "eventrouter.name" . }}
     chart: {{ template "namewithversion" . }}
