@@ -2,12 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "fullname" . }}
-    chart: {{ template "namewithversion" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+  name: {{ printf "%s-%s" .Release.Name "routertest" | trunc 63 }}
   annotations:
     "helm.sh/hook": test-success
 spec:
@@ -27,7 +22,7 @@ spec:
         name: tools
   containers:
     - name: {{ .Release.Name }}-test
-      image: {{ .Values.test.image }}:{{ .Values.test.tag }}
+      image: {{ .Values.test.image }}
       command: ["/tools/bats/bats", "-t", "/tests/run.sh"]
       env:
       - name: TIMENOW
@@ -37,11 +32,15 @@ spec:
         mountPath: /tests
       - name: tools
         mountPath: /tools
+      - name: testfiles
+        mountPath: /testfiles
   volumes:
   - name: tests
     configMap:
-      name: {{ template "fullname" . }}
+      name: {{ printf "%s-%s" .Release.Name "routertest" | trunc 63 }}
   - name: tools
+    emptyDir: {}
+  - name: testfiles
     emptyDir: {}
   restartPolicy: Never
 
@@ -49,12 +48,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "fullname" . }}
-    chart: {{ template "namewithversion" . }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
+  name: {{ printf "%s-%s" .Release.Name "routertest" | trunc 63 }}
 data:
   event-test.tpl: |-
     {
@@ -66,12 +60,13 @@ data:
         "namespace": {{- .Release.Namespace | quote }}
       },
       "kind": "Event",
-      "message": "*** This is an INFO type event triggered by TESTS @ $TIMENOW. ***",
+      "message": "*** This is an INFO type event triggered by TESTS @ $TIMESTAMP. ***",
       "metadata": {
-        "name": "Validate EventRouter Works $TIMENOW"
+        "name": "Validate EventRouter Works $TIMESTAMP"
       },
-      "reportingComponent": null,
-      "reportingInstance": null,
+      "reason": "helmtesting",
+      "reportingComponent": "",
+      "reportingInstance": "",
       "type": "Normal"
     }
 
@@ -84,51 +79,58 @@ data:
     CACERT_FILE="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
     TOKEN="$(< /var/run/secrets/kubernetes.io/serviceaccount/token)"
     TEST_TMPL_DIR="/tests"
+    TEST_TEMP_DIR="/testfiles"
+    BATS_TMPDIR="/testfiles"
     TEST_TMPL="$TEST_TMPL_DIR/event-test.tpl"
-    TEST_JSON="$TEST_TMPL_DIR/tests.json"
+    TEST_JSON="$TEST_TEMP_DIR/tests.json"
     TMP_RESP="$BATS_TMPDIR/resp.out"
+    TIMESTAMP="$(date +%FT%H:%M:%SZ)"
 
     # TIMENOW is set in the pod definition
     cd $TEST_TMPL_DIR
 
     # test 1
     @test "Create VALID test JSON from template" {
-      echo
-      echo "====================================="
-      echo "\$TIMENOW is: $TIMENOW"
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "\$TIMENOW is: $TIMENOW" >&3
+      echo "\$TIMESTAMP is: $TIMESTAMP" >&3
 
       # /tests in $TEST_JSON is using the volumeMounts path
       # from the containers spec
-      sed -r 's/\$TIMENOW/'"$TIMENOW"'/' $TEST_TMPL > $TEST_JSON
+      #sed -r 's/\$TIMENOW/'"$TIMENOW"'/' $TEST_TMPL > $TEST_JSON
+      sed -r 's/\$TIMESTAMP/'"$TIMESTAMP"'/' $TEST_TMPL > $TEST_JSON
+      echo "=====================================" >&3
+      echo "$(cat $TEST_JSON)" >&3
 
       [[ -s $TEST_JSON ]]
     }
 
     # test 2
     @test "Test SEND event to EventRouter Service" {
-      echo
-      echo "====================================="
-      echo "KUBEAPI URL is: $KUBEAPI_URL"
-      echo "TEST_TMPL is: $TEST_TMPL"
-      echo "TEST_JSON is: $TEST_JSON"
-      echo "PWD is: $PWD"
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "KUBEAPI URL is: $KUBEAPI_URL" >&3
+      echo "TEST_TMPL is: $TEST_TMPL" >&3
+      echo "TEST_JSON is: $TEST_JSON" >&3
+      echo "PWD is: $PWD" >&3
 
-      echo
-      echo "====================================="
-      echo "The INPUT TEMPLATE directory contains:"
-      ls -ltr $TEST_TMPL_DIR
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "The INPUT TEMPLATE directory contains:" >&3
+      echo "$(ls -ltr $TEST_TMPL_DIR)" >&3
 
-      echo "The INPUT TEMPLATE contains:"
-      cat $TEST_TMPL
+      echo "The INPUT TEMPLATE contains:" >&3
+      echo "$(cat $TEST_TMPL)" >&3
 
-      echo
-      echo "====================================="
-      echo "The OUTPUT JSON directory contains:"
-      ls -ltr $TEST_JSON_DIR
+      echo "" >&3
+      echo "=====================================" >&3
+      echo "The OUTPUT JSON directory contains:" >&3
+      echo "$(ls -ltr $TEST_TEMP_DIR)" >&3
 
-      echo
-      echo "The INPUT JSON contains (cat -A):"
-      cat -A $TEST_JSON
+      echo "" >&3
+      echo "The INPUT JSON contains (cat -A):" >&3
+      echo "$(cat -A $TEST_JSON)" >&3
 
       run curl --connect-timeout $CNCT_TIMEOUT       \
                --verbose                             \
@@ -143,9 +145,9 @@ data:
 
       resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
 
-      echo
-      echo "STATUS from JSON response was: ${resp_status:=NOT reported; probably because no JSON was returned.}"
-      echo -e "OUTPUT from cURL response was:\n$output"
+      echo "" >&3
+      echo "STATUS from JSON response was: ${resp_status:=NOT reported; probably because no JSON was returned.}" >&3
+      echo -e "OUTPUT from cURL response was:\n$output" >&3 
 
       [[ $resp_status == 2[02][0-6] ]]
     }
@@ -164,12 +166,16 @@ data:
            --write-out "\n\n{\"status\": \"%{http_code}\"}" \
            $KUBEAPI_URL >$TMP_RESP
 
+      resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+      echo "curl get status ${status}" >&3
+
+      # echo "" >&3
+      #echo "RESPONSE from GET EVENTS" >&3
+      #echo "$(cat $TMP_RESP)" >&3
+
       #run jq --arg match_this "$TIMENOW" -c -M '.items[].message | ' $BATS_TMPDIR/resp.out
-      run grep "$TIMENOW" $TMP_RESP
+      ##run grep "$TIMENOW" $TMP_RESP
+      run grep "$TIMESTAMP" $TMP_RESP
 
-      echo
-      echo "RESPONSE from GET EVENTS"
-      cat $TMP_RESP
-
-      [[ $output == *$TIMENOW* ]]
+      [[ $output == *$TIMESTAMP* ]]
     }
