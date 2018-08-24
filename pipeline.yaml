@@ -4,6 +4,7 @@ envValues:
     value: v1.9.2
 rootfs:
   - image: samsung_cnct/eventrouter-container
+    dockerContext: rootfs/eventrouter
     context: eventrouter
     chart: eventrouter
     value: image
