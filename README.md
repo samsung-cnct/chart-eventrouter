@@ -1,14 +1,22 @@
 # Eventrouter Deployment for Kubernetes Logging
-[![pipeline status](https://git.cnct.io/common-tools/samsung-cnct_chart-eventrouter/badges/master/pipeline.svg)](https://git.cnct.io/common-tools/samsung-cnct_chart-eventrouter/commits/master)
+[![Build Status](https://jenkins.migrations.cnct.io/buildStatus/icon?job=pipeline-eventrouter/master)](https://jenkins.migrations.cnct.io/job/pipeline-eventrouter/job/master)
 
 [Eventrouter](https://github.com/heptiolabs/eventrouter) deployment for Kubernetes
-logging. The helm chart and docker image for this repository are located at:
-https://quay.io/application/samsung_cnct/eventrouter and
-https://quay.io/repository/samsung_cnct/eventrouter-container respectively.
+logging. It uses this [helm chart](https://quay.io/application/samsung_cnct/eventrouter) and this [Dockerfile](https://github.com/samsung-cnct/chart-eventrouter/blob/master/rootfs/eventrouter/Dockerfile). 
 
 The eventrouter is used to watch for kubernetes apiserver events.  Eventrouter is
-configured to write the events to stdout.  Our logging component (fluentbit or 
-fluentd) forwards the stdout events to Elasticsearch.
+configured to write the events to stdout.  Our logging component (fluentbit) forwards the stdout events to Elasticsearch.
 
-### To install this chart
-    helm registry install quay.io/samsung_cnct/eventrouter
+## How to install on running Kubernetes cluster with `helm`
+Ensure that you have helm and [tiller](https://docs.helm.sh/using_helm/) installed. 
+### From our chart repository
+``` 
+helm repo add cnct https://charts.migrations.cnct.io
+helm repo update
+helm install cnct/eventrouter
+```  
+### To install from local repository from `/chart-eventrouter/charts`
+
+```
+helm install --name my-release --namespace my-namespace ./eventrouter
+```

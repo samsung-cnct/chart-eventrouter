@@ -2,7 +2,6 @@ name: eventrouter
 version: 0.1.1
 description: A simple introspective kubernetes service that forwards events to a specified sink.
 keywords:
-- kraken
 - eventrouter
 - logging
 home: https://github.com/samsung-cnct/chart-eventrouter
