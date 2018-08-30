@@ -133,7 +133,6 @@ data:
       echo "$(cat -A $TEST_JSON)" >&3
 
       run curl --connect-timeout $CNCT_TIMEOUT       \
-               --verbose                             \
                --silent                              \
                --retry $RETRY_CNT                    \
                --retry-delay $RETRY_DLY              \
@@ -143,7 +142,8 @@ data:
                --write-out "\n\n{\"status\": \"%{http_code}\"}" \
                -X POST $KUBEAPI_URL -d @$TEST_JSON
 
-      resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+      #resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+      resp_status=$(echo "$output" | jq -r ". | select(.status != null) | .status" )
 
       echo "" >&3
       echo "STATUS from JSON response was: ${resp_status:=NOT reported; probably because no JSON was returned.}" >&3
@@ -154,8 +154,10 @@ data:
 
     # test 3
     @test "Test VERIFY event to EventRouter Service RECVd" {
+      # sleep for a little to make sure it gets written
+      sleep 3
+
       curl --connect-timeout $CNCT_TIMEOUT           \
-           --verbose                                 \
            --silent                                  \
            --retry $RETRY_CNT                        \
            --retry-delay $RETRY_DLY                  \
@@ -166,16 +168,16 @@ data:
            --write-out "\n\n{\"status\": \"%{http_code}\"}" \
            $KUBEAPI_URL >$TMP_RESP
 
-      resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
-      echo "curl get status ${status}" >&3
+      #resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
+      resp_status=$(cat $TMP_RESP | jq -r -M ". | select(.status != null) | .status" )
+      echo "curl get status ${resp_status}" >&3
 
-      # echo "" >&3
-      #echo "RESPONSE from GET EVENTS" >&3
-      #echo "$(cat $TMP_RESP)" >&3
+      echo "" >&3
+      echo "RESPONSE from GET EVENTS" >&3
+      echo "$(cat $TMP_RESP)" >&3
 
-      #run jq --arg match_this "$TIMENOW" -c -M '.items[].message | ' $BATS_TMPDIR/resp.out
-      ##run grep "$TIMENOW" $TMP_RESP
-      run grep "$TIMESTAMP" $TMP_RESP
+      time_resp=$(cat $TMP_RESP | jq -c -M ".items[] | select( .message  | contains(\"$TIMESTAMP\") )" )
+      echo "grep of GET EVENTS: $time_resp" >&3
 
-      [[ $output == *$TIMESTAMP* ]]
+      [[ $time_resp == *$TIMESTAMP* ]]
     }
