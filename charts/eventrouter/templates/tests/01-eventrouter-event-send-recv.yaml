@@ -155,29 +155,43 @@ data:
     # test 3
     @test "Test VERIFY event to EventRouter Service RECVd" {
       # sleep for a little to make sure it gets written
-      sleep 3
+      ATTEMPTS=1
+      RESP=0
+      while [[ $ATTEMPTS -lt 20 ]];do
+        sleep 3
+        curl --connect-timeout $CNCT_TIMEOUT           \
+             --silent                                  \
+             --retry $RETRY_CNT                        \
+             --retry-delay $RETRY_DLY                  \
+             --retry-max-time  $RETRY_MAX_TIME         \
+             --cacert $CACERT_FILE                     \
+             --header "Authorization: Bearer $TOKEN"   \
+             --header "Content-Type: application/json" \
+             --write-out "\n\n{\"status\": \"%{http_code}\"}" \
+             $KUBEAPI_URL >$TMP_RESP
 
-      curl --connect-timeout $CNCT_TIMEOUT           \
-           --silent                                  \
-           --retry $RETRY_CNT                        \
-           --retry-delay $RETRY_DLY                  \
-           --retry-max-time  $RETRY_MAX_TIME         \
-           --cacert $CACERT_FILE                     \
-           --header "Authorization: Bearer $TOKEN"   \
-           --header "Content-Type: application/json" \
-           --write-out "\n\n{\"status\": \"%{http_code}\"}" \
-           $KUBEAPI_URL >$TMP_RESP
+        resp_status=$(cat $TMP_RESP | jq -r -M ". | select(.status != null) | .status" )
+        echo "curl get status ${resp_status}" >&3
 
-      #resp_status=$(echo "$output" | tail -n 1 | jq -r -M '.status' )
-      resp_status=$(cat $TMP_RESP | jq -r -M ". | select(.status != null) | .status" )
-      echo "curl get status ${resp_status}" >&3
+        #echo "" >&3
+        #echo "RESPONSE from GET EVENTS" >&3
+        #echo "$(cat $TMP_RESP)" >&3
+        echo "" >&3
+        tmp_resp0=$(cat $TMP_RESP | jq -r -M ". | select(.items != null) | .items")
+        #echo "tmp_resp0 $tmp_resp0" >&3
+  
+        time_resp1=$(echo $tmp_resp0 | jq -r -M ".[] | select( .message  | contains(\"$TIMESTAMP\") )" )
+        echo "grep of GET EVENTS for message with:$TIMESTAMP:$time_resp1:" >&3
+        time_resp=$(echo $time_resp1 | jq -r -M ". | select(.message != null) | .message")
+        echo "grep of GET EVENTS for:$TIMESTAMP:$time_resp:" >&3
 
-      echo "" >&3
-      echo "RESPONSE from GET EVENTS" >&3
-      echo "$(cat $TMP_RESP)" >&3
-
-      time_resp=$(cat $TMP_RESP | jq -c -M ".items[] | select( .message  | contains(\"$TIMESTAMP\") )" )
-      echo "grep of GET EVENTS: $time_resp" >&3
-
-      [[ $time_resp == *$TIMESTAMP* ]]
+        if  [[ "x$time_resp" != "x" ]] && [[ $time_resp =~ .*$TIMESTAMP.* ]]; then
+           RESP=1
+           break
+        else
+           ((ATTEMPTS++))
+           echo "Retry: $ATTEMPTS" >&3
+        fi
+      done
+      [[ $RESP == 1 ]]
     }
