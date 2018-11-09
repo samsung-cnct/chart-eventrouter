@@ -1,6 +1,7 @@
 name: eventrouter
-version: 0.1.1
-description: A simple introspective kubernetes service that forwards events to a specified sink.
+version: 0.1.2
+description: A simple introspective kubernetes service that forwards events to a specified
+   sink.
 keywords:
 - eventrouter
 - logging
