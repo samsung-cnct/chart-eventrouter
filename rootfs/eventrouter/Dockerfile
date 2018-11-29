@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM alpine:3.8
-LABEL MAINTAINER="OSS Maintainers <oss-maintainer@samsung-cnct.io>"
+FROM alpine:3.5
+LABEL MAINTAINER="Samsung CNCT OSS Maintainers <oss-maintainer@samsung-cnct.io>"
 
 RUN apk update --no-cache && apk add ca-certificates \
   && apk --no-cache add --virtual .build-deps \
