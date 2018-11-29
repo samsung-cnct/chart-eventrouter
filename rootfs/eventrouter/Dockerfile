@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM alpine:3.5
+FROM alpine:3.8
+LABEL MAINTAINER="OSS Maintainers <oss-maintainer@samsung-cnct.io>"
 
-RUN apk update --no-cache && apk add ca-certificates
-
-RUN apk --no-cache add --virtual .build-deps \
-    go git libc-dev \
+RUN apk update --no-cache && apk add ca-certificates \
+  && apk --no-cache add --virtual .build-deps \
+  go git libc-dev \
   && mkdir /go \
   && GOPATH=/go go get github.com/heptiolabs/eventrouter \
   && cp /go/bin/eventrouter /usr/local/bin/ \
@@ -26,6 +26,6 @@ RUN apk --no-cache add --virtual .build-deps \
   && apk del .build-deps
 
 COPY config.json /etc/eventrouter/
-USER nobody:nobody
 
+USER nobody:nobody
 CMD ["/bin/sh", "-c", "/usr/local/bin/eventrouter -v 3 -logtostderr"]
