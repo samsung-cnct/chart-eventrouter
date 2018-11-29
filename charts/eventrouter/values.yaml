@@ -1,6 +1,6 @@
 name: eventrouter
 replicaCount: 1
-image: quay.io/samsung_cnct/eventrouter-container:0.2.0
+image: quay.io/samsung_cnct/eventrouter-container:0.2.1
 imagePullPolicy: IfNotPresent
 config:
    sink: stdout
