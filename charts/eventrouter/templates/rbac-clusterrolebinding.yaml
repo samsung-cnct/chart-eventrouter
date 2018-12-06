@@ -13,6 +13,6 @@ roleRef:
   kind: ClusterRole
   name: "{{ template "uniqName" . }}"
 subjects:
-- kind: ServiceAccount
-  name: "{{ template "uniqName" . }}"
-  namespace: {{.Release.Namespace}}
+  - kind: ServiceAccount
+    name: "{{ template "uniqName" . }}"
+    namespace: {{.Release.Namespace}}

@@ -21,8 +21,8 @@ spec:
           image: {{ .Values.image }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
-          - name: config-volume
-            mountPath: /etc/eventrouter
+            - name: config-volume
+              mountPath: /etc/eventrouter
           resources:
             limits:
               cpu: 10m
