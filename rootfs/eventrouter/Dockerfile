@@ -15,7 +15,8 @@
 FROM alpine:3.8
 LABEL MAINTAINER="Samsung CNCT OSS Maintainers <oss-maintainer@samsung-cnct.io>"
 
-RUN apk update --no-cache && apk add ca-certificates \
+RUN apk update --no-cache \
+  && apk add ca-certificates \
   && apk --no-cache add --virtual .build-deps \
   go git libc-dev \
   && mkdir /go \
