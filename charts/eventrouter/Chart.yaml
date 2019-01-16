@@ -13,3 +13,4 @@ maintainers:
   email: oss-maintainer@samsung-cnct.io
 icon: https://github.com/samsung-cnct/solas/docs/images/samsung-logo.svg
 engine: gotpl
+appVersion: 0.3.1
