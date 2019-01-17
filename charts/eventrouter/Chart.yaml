@@ -1,5 +1,5 @@
 name: eventrouter
-version: 0.3.1
+version: 0.3.2
 description: A simple introspective kubernetes service that forwards events to a specified
    sink.
 keywords:
@@ -13,4 +13,5 @@ maintainers:
   email: oss-maintainer@samsung-cnct.io
 icon: https://github.com/samsung-cnct/solas/docs/images/samsung-logo.svg
 engine: gotpl
-appVersion: 0.3.1
+# value should match values.image version
+appVersion: 0.3.2
