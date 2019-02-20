@@ -1,6 +1,6 @@
 # Heptio Labs Eventrouter Helm Chart
 
-[![Build Status][1]](https://jenkins.migrations.cnct.io/job/pipeline-eventrouter/job/master)
+[![Build Status][1]](https://jenkins.cnct.io/job/pipeline-eventrouter/job/master)
 
 [Eventrouter][2] deployment for Kubernetes, using this [helm chart][3] and this [Dockerfile][4].
 
