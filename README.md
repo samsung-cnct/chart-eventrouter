@@ -12,7 +12,7 @@ Eventrouter is configured to write the events to stdout. In CNCT use, (fluentbit
 
 Prerequisites: helm, [tiller][5]
 
-    helm repo add cnct https://charts.migrations.cnct.io
+    helm repo add cnct https://charts.cnct.io
     helm repo update
     helm install cnct/eventrouter
 
