@@ -1,7 +1,7 @@
 name: eventrouter
 replicaCount: 1
 # value should match Chart.appVersion
-image: quay.io/samsung_cnct/eventrouter-container:0.3.2
+image: quay.io/samsung_cnct/eventrouter-container:0.3.3
 imagePullPolicy: IfNotPresent
 config:
    sink: stdout
